@@ -5,11 +5,35 @@
 #include <unistd.h>
 #include <termios.h>
 #include <stdlib.h>
+#include <string.h> 
 #include <ctype.h>
 #include <errno.h>
 
 /*** defines ***/ 
 #define CTRL_KEY(k) ((k) & 0x1f)
+
+/*** abuf ***/ 
+
+struct abuf {
+    char *b; 
+    size_t length; 
+};
+
+#define ABUF_INIT {NULL, 0}
+
+void abAppend(struct abuf *ab, const char *s, int len) {
+    char *new_ab = realloc(ab->b, ab->length + len); 
+
+    if (new_ab == NULL)
+        return; 
+    memcpy(&new_ab[ab->length], s, len);
+    ab->b = new_ab;
+    ab->length += len;  
+}
+
+void abFree(struct abuf *ab) {
+    free(ab->b); 
+}
 
 /*** data ***/ 
 
