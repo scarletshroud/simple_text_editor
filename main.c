@@ -25,7 +25,11 @@ struct config conf;
 
 void draw_tildes() {
     for (size_t i = 0; i < conf.screenRows; i++) {
-        write(STDOUT_FILENO, "~\r\n", 3);
+        write(STDOUT_FILENO, "~", 1); 
+
+        if (i < conf.screenRows - 1) {
+            write(STDOUT_FILENO, "\r\n", 2);
+        }
     } 
 }
 
@@ -95,7 +99,7 @@ void enable_raw_mode() {
     }
 }
 
-int getCursorPosititon(size_t *rows, size_t *cols) {
+int get_cursor_pos(size_t *rows, size_t *cols) {
     char buf[32]; 
 
     if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4) {
@@ -127,14 +131,14 @@ int getCursorPosititon(size_t *rows, size_t *cols) {
     return 0;
 }
 
-int getWindowSize(size_t *rows, size_t *cols) {
+int get_win_size(size_t *rows, size_t *cols) {
     struct winsize w; 
 
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1 || w.ws_col ==0) {
         if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) { 
             return -1; 
         }
-        return getCursorPosititon(rows, cols); 
+        return get_cursor_pos(rows, cols); 
     };
     
     *rows = w.ws_row;
@@ -144,7 +148,7 @@ int getWindowSize(size_t *rows, size_t *cols) {
 }
     
 void init() {
-    if(getWindowSize(&conf.screenCols, &conf.screenRows) == -1) {
+    if(get_win_size(&conf.screenCols, &conf.screenRows) == -1) {
         print_error_msg("Unable to get a window size.");
     } 
 }
